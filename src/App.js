@@ -48,12 +48,18 @@ const BusTicketSystem = () => {
   };
 
   /**
-   * Generates a unique transaction ID based on the specified date.
+   * Generates a unique transaction ID based on the current date in IST.
    * Format: T{DDMMYYYY}{12 random alphanumeric chars}
    * @returns {string} The generated transaction ID.
    */
   const generateTransactionId = () => {
-    const dateStr = '27072025'; // Using the specified date: July 27, 2025
+    const now = new Date();
+    // Get date parts in IST timezone
+    const day = now.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'Asia/Kolkata' });
+    const month = now.toLocaleDateString('en-GB', { month: '2-digit', timeZone: 'Asia/Kolkata' });
+    const year = now.toLocaleDateString('en-GB', { year: 'numeric', timeZone: 'Asia/Kolkata' });
+    const dateStr = `${day}${month}${year}`;
+    
     const upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const lowerChars = 'abcdefghijklmnopqrstuvwxyz';
     
@@ -101,11 +107,36 @@ const BusTicketSystem = () => {
   };
 
   /**
-   * Returns the specified date and time for the booking.
+   * Returns the current date and time in IST, formatted for display.
    * @returns {string} The formatted date and time string.
    */
   const getBookingDateTime = () => {
-    return '27 Jul 25 | 12:28 PM'; // Using the specified date and time
+    const now = new Date();
+    
+    // Use Intl.DateTimeFormat to reliably get parts in the IST timezone
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        year: '2-digit',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    });
+
+    const parts = formatter.formatToParts(now);
+    // Helper function to find a specific part in the formatted array
+    const findPart = (type) => parts.find(part => part.type === type)?.value;
+
+    const day = findPart('day');
+    const month = findPart('month');
+    const year = findPart('year');
+    const hour = findPart('hour');
+    const minute = findPart('minute');
+    const dayPeriod = findPart('dayPeriod');
+
+    // Reconstruct the string in the desired "DD MMM YY | hh:mm AM/PM" format
+    return `${day} ${month} ${year} | ${hour}:${minute} ${dayPeriod}`;
   };
 
   /**
